@@ -119,7 +119,7 @@ class ColorCubeGridSceneCfg(InteractiveSceneCfg):
     )
 
     robot = G1RobotPresets.g1_29dof_inspire_base_fix(
-        init_pos=(-4.2, -3.7, 0.76),
+        init_pos=(-4.2, -3.5, 0.76),
         init_rot=(0.7071, 0, 0, -0.7071),
     )
 
