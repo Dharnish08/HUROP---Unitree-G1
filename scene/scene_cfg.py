@@ -30,14 +30,13 @@ from isaaclab.scene import InteractiveSceneCfg
 from isaaclab.sim.spawners.from_files.from_files_cfg import UsdFileCfg
 from isaaclab.utils import configclass
 
-from tasks.common_config import G1RobotPresets, CameraPresets
+from tasks.common_config import G1RobotPresets, CameraPresets, CameraBaseCfg
 
 project_root = os.environ.get("PROJECT_ROOT", UNITREE_REPO_PATH)
 
 CUBE_SIZE = 0.06
-# Moved further from the robot's resting hand position (robot init_pos y=-3.7) so
-# cubes don't spawn already touching/overlapping the hand geometry, and widened
-# spacing so cubes are more clearly separated in both the render and for grasp planning.
+# Grid position tuned through testing: -4.15/0.12 keeps cubes on the table
+# surface (not falling off) with clear separation between cells.
 TABLE_CENTER_X = -4.25
 TABLE_CENTER_Y = -4.15
 TABLE_SURFACE_Z = 0.84
@@ -118,12 +117,17 @@ class ColorCubeGridSceneCfg(InteractiveSceneCfg):
         ),
     )
 
+    # Robot base moved back from the table (y=-3.5 instead of the default -3.7 area)
+    # so the hands don't collide with cubes at their resting joint pose.
     robot = G1RobotPresets.g1_29dof_inspire_base_fix(
         init_pos=(-4.2, -3.5, 0.76),
         init_rot=(0.7071, 0, 0, -0.7071),
     )
 
-    front_camera = CameraPresets.g1_front_camera()
+    # Front camera: rgb + depth (distance_to_camera), needed for 3D back-projection
+    # in the CV detection step. Using CameraBaseCfg directly (not the g1_front_camera
+    # preset) so we can add the depth data type while keeping the same pos/rot as the preset.
+    front_camera = CameraBaseCfg.get_camera_config(data_types=["rgb", "distance_to_camera"])
 
     # Light source - the reference scene had this commented out, but our CV
     # detection step (HSV color thresholding) needs consistent, adequate lighting
